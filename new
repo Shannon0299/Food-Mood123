@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Mood Selector</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem; /* Increased margin between cards */
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .mood-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .mood-title {
+            color: #334155; /* Darker text for titles */
+            font-weight: 700; /* Bold */
+            font-size: 1.5rem; /* Larger title */
+        }
+        .shuffle-btn, .feeling-lucky-btn {
+            background-color: #6366f1; /* Indigo color */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            font-size: 0.875rem; /* Smaller font for button */
+        }
+        .shuffle-btn:hover, .feeling-lucky-btn:hover {
+            background-color: #4f46e5; /* Darker indigo on hover */
+            transform: translateY(-2px);
+        }
+        .shuffle-btn:active, .feeling-lucky-btn:active {
+            transform: translateY(0);
+        }
+        .suggestions-list {
+            list-style: none;
+            padding: 0;
+            min-height: 50px; /* Ensure list has some height even if empty */
+        }
+        .suggestions-list li {
+            background-color: #e2e8f0; /* Lighter background for list items */
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem; /* Rounded list items */
+            margin-bottom: 0.5rem;
+            color: #475569; /* Medium gray text */
+            font-weight: 500;
+            display: flex; /* Use flex for aligning text and button */
+            justify-content: space-between; /* Space between text and button */
+            align-items: center; /* Vertically center */
+            opacity: 0; /* Start hidden for fade-in animation */
+            animation: fadeIn 0.5s forwards; /* Apply fade-in animation */
+        }
+        .suggestions-list li:last-child {
+            margin-bottom: 0;
+        }
+        .copy-btn {
+            background-color: #10b981; /* Emerald green */
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            margin-left: 10px; /* Space from text */
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+        .copy-btn:hover {
+            background-color: #059669; /* Darker green on hover */
+        }
+        .copy-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 1000;
+        }
+        .copy-message.show {
+            opacity: 1;
+        }
+
+        /* Fade-in animation for list items */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div class="w-full max-w-2xl mx-auto">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-gray-800 mb-8 sm:mb-10 leading-tight">
+            What's Your Food Mood?
+        </h1>
+
+        <!-- Feeling Lucky Button -->
+        <div class="text-center mb-8">
+            <button id="feeling-lucky-btn" class="feeling-lucky-btn px-6 py-3 text-lg">
+                Feeling Lucky? ✨
+            </button>
+        </div>
+
+        <!-- Comfort Craver Mood -->
+        <div class="card">
+            <div class="mood-header">
+                <h2 class="mood-title">😌 The "Comfort Craver" Mood</h2>
+                <button class="shuffle-btn" data-mood="comfort">Shuffle</button>
+            </div>
+            <ul id="comfort-suggestions" class="suggestions-list"></ul>
+        </div>
+
+        <!-- Quick & Easy Mood -->
+        <div class="card">
+            <div class="mood-header">
+                <h2 class="mood-title">⚡ The "Quick & Easy" Mood</h2>
+                <button class="shuffle-btn" data-mood="quick-easy">Shuffle</button>
+            </div>
+            <ul id="quick-easy-suggestions" class="suggestions-list"></ul>
+        </div>
+
+        <!-- Healthy & Fresh Mood -->
+        <div class="card">
+            <div class="mood-header">
+                <h2 class="mood-title">🥗 The "Healthy & Fresh" Mood</h2>
+                <button class="shuffle-btn" data-mood="healthy-fresh">Shuffle</button>
+            </div>
+            <ul id="healthy-fresh-suggestions" class="suggestions-list"></ul>
+        </div>
+
+        <!-- Adventurous Eater Mood -->
+        <div class="card">
+            <div class="mood-header">
+                <h2 class="mood-title">🌍 The "Adventurous Eater" Mood</h2>
+                <button class="shuffle-btn" data-mood="adventurous">Shuffle</button>
+            </div>
+            <ul id="adventurous-suggestions" class="suggestions-list"></ul>
+        </div>
+
+        <!-- Treat Yourself Mood -->
+        <div class="card">
+            <div class="mood-header">
+                <h2 class="mood-title">✨ The "Treat Yourself" Mood</h2>
+                <button class="shuffle-btn" data-mood="treat-yourself">Shuffle</button>
+            </div>
+            <ul id="treat-yourself-suggestions" class="suggestions-list"></ul>
+        </div>
+
+        <!-- Something Soupy/Warm Mood -->
+        <div class="card">
+            <div class="mood-header">
+                <h2 class="mood-title">🍜 The "Something Soupy/Warm" Mood</h2>
+                <button class="shuffle-btn" data-mood="soupy-warm">Shuffle</button>
+            </div>
+            <ul id="soupy-warm-suggestions" class="suggestions-list"></ul>
+        </div>
+
+        <!-- Budget Friendly Mood -->
+        <div class="card">
+            <div class="mood-header">
+                <h2 class="mood-title">💰 The "Budget Friendly" Mood</h2>
+                <button class="shuffle-btn" data-mood="budget-friendly">Shuffle</button>
+            </div>
+            <ul id="budget-friendly-suggestions" class="suggestions-list"></ul>
+        </div>
+
+        <p class="text-center text-gray-600 text-sm mt-8">
+            Just pick the mood that fits how you're feeling, and click "Shuffle" for delicious ideas!
+            Or, try your luck with the "Feeling Lucky?" button!
+        </p>
+
+        <!-- Copy message display -->
+        <div id="copy-message" class="copy-message"></div>
+    </div>
+
+    <script>
+        // Define all food suggestions categorized by mood
+        const foodSuggestions = {
+            'comfort': [
+                'Mac and cheese', 'Hearty stew', 'Classic pizza', 'Grilled cheese and tomato soup',
+                'Biryani', 'Khichdi', 'Shepherd\'s pie', 'Creamy chicken pasta', 'Pork ribs with mashed potatoes',
+                'Pulled pork sandwich', 'Bacon-wrapped anything'
+            ],
+            'quick-easy': [
+                'Sandwiches', 'Wraps', 'Instant noodles (ramen/Maggi)', 'Frozen meals',
+                'Takeout from a local fast-food spot', 'Ready-to-eat curries', 'Leftover fried rice',
+                'Scrambled eggs with toast', 'Pork sausage and egg muffin', 'Quick bacon sandwich'
+            ],
+            'healthy-fresh': [
+                'Salads', 'Grilled chicken/fish with veggies', 'Fruit bowls', 'Smoothies',
+                'Lentil soup', 'A simple dal-roti', 'Quinoa bowl with roasted vegetables',
+                'Lean pork stir-fry with plenty of greens', 'Baked salmon with asparagus'
+            ],
+            'adventurous': [
+                'A cuisine they haven\'t had in a while (e.g., Ethiopian, Korean BBQ, Mexican, Thai)',
+                'A new restaurant they\'ve heard about', 'A recipe with exotic ingredients',
+                'Pork Vindaloo', 'Korean Pork Belly BBQ (Samgyeopsal)', 'Filipino Adobo (Pork)',
+                'Spicy Sichuan boiled pork', 'Peruvian Lomo Saltado'
+            ],
+            'treat-yourself': [
+                'A fancy dessert', 'Gourmet burger', 'Steak dinner', 'Rich pasta dish',
+                'Premium ice cream', 'A special pastry', 'Lobster bisque', 'Pork belly tacos',
+                'Crispy pork knuckle', 'Smoked brisket', 'Rack of lamb'
+            ],
+            'soupy-warm': [
+                'Chicken noodle soup', 'Tomato soup', 'Pho', 'Ramen', 'Hot and sour soup',
+                'Rasam', 'Comforting lentil soup', 'Pork and cabbage soup', 'Miso soup with pork',
+                'Cream of mushroom soup'
+            ],
+            'budget-friendly': [
+                'Dal Chawal (Lentils and Rice)', 'Aloo Gobhi (Potato and Cauliflower)',
+                'Egg Curry/Bhurji', 'Simple Pasta with Tomato Sauce', 'Ramen/Instant Noodles',
+                'Leftovers makeover', 'Peanut Butter & Jelly sandwich', 'Chana Masala (Chickpea Curry)',
+                'Beans on toast', 'Oatmeal', 'Simple vegetable pulao', 'Pork and bean stew'
+            ]
+        };
+
+        const copyMessageElement = document.getElementById('copy-message');
+
+        /**
+         * Shuffles an array in place using the Fisher-Yates (Knuth) shuffle algorithm.
+         * @param {Array} array The array to shuffle.
+         * @returns {Array} The shuffled array.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        /**
+         * Displays a randomized subset of suggestions for a given mood.
+         * @param {string} moodId The ID of the mood (e.g., 'comfort').
+         * @param {number} numToShow The number of suggestions to display.
+         */
+        function displaySuggestions(moodId, numToShow = 3) {
+            const listElement = document.getElementById(`${moodId}-suggestions`);
+            if (!listElement) {
+                console.error(`List element for mood ID "${moodId}" not found.`);
+                return;
+            }
+
+            const allSuggestions = foodSuggestions[moodId];
+            if (!allSuggestions || allSuggestions.length === 0) {
+                listElement.innerHTML = '<li>No suggestions available for this mood.</li>';
+                return;
+            }
+
+            // Shuffle a copy of the array and take the first 'numToShow' elements
+            const shuffledSuggestions = shuffleArray([...allSuggestions]).slice(0, numToShow);
+
+            // Clear existing list items
+            listElement.innerHTML = '';
+
+            // Add new randomized list items with copy buttons
+            if (shuffledSuggestions.length > 0) {
+                shuffledSuggestions.forEach((suggestion, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = suggestion; // Set text content first
+
+                    // Create copy button
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-btn';
+                    copyButton.textContent = 'Copy';
+                    copyButton.onclick = () => copyTextToClipboard(suggestion);
+
+                    listItem.appendChild(copyButton); // Append button to list item
+                    listElement.appendChild(listItem);
+
+                    // Add a slight delay for staggered fade-in effect
+                    listItem.style.animationDelay = `${index * 0.1}s`;
+                });
+            } else {
+                 listElement.innerHTML = '<li>Click Shuffle for ideas!</li>'; // Fallback if slice results in empty
+            }
+        }
+
+        /**
+         * Copies text to the clipboard and shows a temporary message.
+         * @param {string} text The text to copy.
+         */
+        function copyTextToClipboard(text) {
+            // Use document.execCommand('copy') for better compatibility in iframes
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+                showCopyMessage('Copied!');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showCopyMessage('Failed to copy. Please try manually.');
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        /**
+         * Displays a temporary message at the bottom of the screen.
+         * @param {string} message The message to display.
+         */
+        function showCopyMessage(message) {
+            copyMessageElement.textContent = message;
+            copyMessageElement.classList.add('show');
+            setTimeout(() => {
+                copyMessageElement.classList.remove('show');
+            }, 2000); // Message disappears after 2 seconds
+        }
+
+        /**
+         * Handles the "Feeling Lucky" button click.
+         * Randomly selects a mood and displays a random suggestion from it.
+         */
+        function handleFeelingLucky() {
+            const moodKeys = Object.keys(foodSuggestions);
+            if (moodKeys.length === 0) {
+                showCopyMessage("No moods available to pick from!");
+                return;
+            }
+
+            // Randomly select a mood
+            const randomMoodId = moodKeys[Math.floor(Math.random() * moodKeys.length)];
+            const randomMoodSuggestions = foodSuggestions[randomMoodId];
+
+            if (!randomMoodSuggestions || randomMoodSuggestions.length === 0) {
+                showCopyMessage(`No suggestions for the randomly picked mood: ${randomMoodId}!`);
+                return;
+            }
+
+            // Randomly select one suggestion from that mood
+            const randomSuggestion = randomMoodSuggestions[Math.floor(Math.random() * randomMoodSuggestions.length)];
+
+            // Display the result prominently (e.g., in a message box or by updating a specific area)
+            // For now, let's copy it and show a message
+            copyTextToClipboard(`Feeling Lucky chose: ${randomSuggestion} (from ${randomMoodId.replace('-', ' ').toUpperCase()} mood)`);
+
+            // Optionally, you could also update the specific mood's list to show this suggestion
+            // This would require a slight modification to displaySuggestions to show just one item
+            // For simplicity, we'll just copy it and show the message.
+        }
+
+
+        // Initialize suggestions for all moods when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const mood in foodSuggestions) {
+                displaySuggestions(mood); // Display 3 random suggestions initially
+            }
+
+            // Add event listeners to all shuffle buttons
+            document.querySelectorAll('.shuffle-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const moodToShuffle = event.target.dataset.mood;
+                    displaySuggestions(moodToShuffle);
+                });
+            });
+
+            // Add event listener for the "Feeling Lucky" button
+            document.getElementById('feeling-lucky-btn').addEventListener('click', handleFeelingLucky);
+        });
+    </script>
+</body>
+</html>
