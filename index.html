@@ -104,6 +104,39 @@
             opacity: 1;
         }
 
+        /* Feeling Lucky Result Display */
+        #feeling-lucky-result {
+            background-color: #dbeafe; /* Light blue */
+            border: 2px solid #60a5fa; /* Blue border */
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e3a8a; /* Dark blue text */
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        #feeling-lucky-result.show {
+            display: flex; /* Show when active */
+        }
+        #feeling-lucky-result .clear-lucky-btn {
+            background-color: #ef4444; /* Red */
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        #feeling-lucky-result .clear-lucky-btn:hover {
+            background-color: #dc2626; /* Darker red */
+        }
+
         /* Fade-in animation for list items */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -122,6 +155,12 @@
             <button id="feeling-lucky-btn" class="feeling-lucky-btn px-6 py-3 text-lg">
                 Feeling Lucky? ✨
             </button>
+        </div>
+
+        <!-- Feeling Lucky Result Display Area -->
+        <div id="feeling-lucky-result" class="card">
+            <span id="lucky-food-display"></span>
+            <button id="clear-lucky-btn" class="clear-lucky-btn">Clear</button>
         </div>
 
         <!-- Comfort Craver Mood -->
@@ -239,6 +278,9 @@
         };
 
         const copyMessageElement = document.getElementById('copy-message');
+        const feelingLuckyResultElement = document.getElementById('feeling-lucky-result');
+        const luckyFoodDisplayElement = document.getElementById('lucky-food-display');
+        const clearLuckyBtn = document.getElementById('clear-lucky-btn');
 
         /**
          * Shuffles an array in place using the Fisher-Yates (Knuth) shuffle algorithm.
@@ -348,22 +390,26 @@
             const randomMoodSuggestions = foodSuggestions[randomMoodId];
 
             if (!randomMoodSuggestions || randomMoodSuggestions.length === 0) {
-                showCopyMessage(`No suggestions for the randomly picked mood: ${randomMoodId}!`);
+                luckyFoodDisplayElement.textContent = `No suggestions for the randomly picked mood: ${randomMoodId}!`;
+                feelingLuckyResultElement.classList.add('show');
                 return;
             }
 
             // Randomly select one suggestion from that mood
             const randomSuggestion = randomMoodSuggestions[Math.floor(Math.random() * randomMoodSuggestions.length)];
 
-            // Display the result prominently (e.g., in a message box or by updating a specific area)
-            // For now, let's copy it and show a message
-            copyTextToClipboard(`Feeling Lucky chose: ${randomSuggestion} (from ${randomMoodId.replace('-', ' ').toUpperCase()} mood)`);
-
-            // Optionally, you could also update the specific mood's list to show this suggestion
-            // This would require a slight modification to displaySuggestions to show just one item
-            // For simplicity, we'll just copy it and show the message.
+            // Update the display area
+            luckyFoodDisplayElement.innerHTML = `Your Lucky Pick: <br><span class="text-2xl font-bold">${randomSuggestion}</span> <br>(from the ${randomMoodId.replace('-', ' ').toLowerCase()} mood)`;
+            feelingLuckyResultElement.classList.add('show');
         }
 
+        /**
+         * Clears the "Feeling Lucky" result display.
+         */
+        function clearLuckyResult() {
+            feelingLuckyResultElement.classList.remove('show');
+            luckyFoodDisplayElement.textContent = '';
+        }
 
         // Initialize suggestions for all moods when the page loads
         document.addEventListener('DOMContentLoaded', () => {
@@ -381,6 +427,9 @@
 
             // Add event listener for the "Feeling Lucky" button
             document.getElementById('feeling-lucky-btn').addEventListener('click', handleFeelingLucky);
+
+            // Add event listener for the "Clear" button on the lucky result
+            clearLuckyBtn.addEventListener('click', clearLuckyResult);
         });
     </script>
 </body>
